@@ -18,3 +18,5 @@ Special thanks to the open source community for many useful ideas that accelerat
 Further ideas and suggestions for improvement are very welcome.
 
 *KALI LINUX™ is a trademark of Offensive Security.*
+
+*Translated with www.DeepL.com/Translator - Thanks:-)*
