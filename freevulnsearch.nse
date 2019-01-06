@@ -9,7 +9,7 @@ local json = require "json"
 
 description = [[
 
-This script [Version 1.0] allows you to automatically search for CVEs using the API of 
+This script [Version 1.0.1] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -21,6 +21,7 @@ and special thanks to the community for many useful ideas that speed up my codin
 
 Realized functions:
 Version 1.0 - Contains the basic functions to quickly find relevant CVEs.
+Version 1.0.1 - Includes EDB and MSF in output and minor changes
 
 Future functions:
 Version 1.1 - Shall contains optional sort by severity (CVSS)
