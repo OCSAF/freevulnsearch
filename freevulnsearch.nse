@@ -36,9 +36,6 @@ CVE-Number	CVSS	OSSTMM	 CVE-Link
 CVE-Number:
 Common Vulnerabilities and Exposures
 
-CVSS:
-Common Vulnerability Scoring System with with the level of severty from 0.0 - 10.0
-
 OSSTMM:
 OSSTMM Category derived from CVSS
 Vulnerability (CVSS 8.0 - 10.0)
@@ -46,6 +43,15 @@ Weakness (CVSS 6.0 - 7.9)
 Concerns (CVSS 4.0 - 5.9)
 Exposure (CVSS 2.0 - 3.9)
 Information (CVSS 0.0 - 1.9)
+
+CVSS:
+Common Vulnerability Scoring System with with the level of severty from 0.0 - 10.0
+
+EDB:
+There is an exploit in the Exploit-DB.com
+
+MSF:
+There is a module in the Metasploit Framework
 
 CVE-Link:
 Additional information on the vulnerability found.
@@ -65,12 +71,12 @@ categories = {"safe", "vuln", "external"}
 --
 -- 22/tcp   open  ssh     OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
 -- | freevulnsearch: 
--- |   CVE-2018-15473	Concerns	5.0	https://cve.circl.lu/cve/CVE-2018-15473
--- |   CVE-2017-15906	Concerns	5.0	https://cve.circl.lu/cve/CVE-2017-15906
--- |   CVE-2016-10708	Concerns	5.0	https://cve.circl.lu/cve/CVE-2016-10708
--- |   CVE-2010-4755	Concerns	4.0	https://cve.circl.lu/cve/CVE-2010-4755
--- |   CVE-2010-4478	Weakness	7.5	https://cve.circl.lu/cve/CVE-2010-4478
--- |   CVE-2008-5161	Exposure	2.6	https://cve.circl.lu/cve/CVE-2008-5161
+-- |   CVE-2018-15473	Concerns	5.0	EDB MSF	https://cve.circl.lu/cve/CVE-2018-15473
+-- |   CVE-2017-15906	Concerns	5.0		https://cve.circl.lu/cve/CVE-2017-15906
+-- |   CVE-2016-10708	Concerns	5.0		https://cve.circl.lu/cve/CVE-2016-10708
+-- |   CVE-2010-4755	Concerns	4.0		https://cve.circl.lu/cve/CVE-2010-4755
+-- |   CVE-2010-4478	Weakness	7.5		https://cve.circl.lu/cve/CVE-2010-4478
+-- |   CVE-2008-5161	Exposure	2.6		https://cve.circl.lu/cve/CVE-2008-5161
 -- |_  (cpe:/a:openbsd:openssh:4.7p1)
 --
 
@@ -90,7 +96,7 @@ end
 function func_check_cpe(cpe)
 	
 	_, count = string.gsub(cpe, ":", " ")
-    	if count == 4 then
+    	if count >= 4 then
 	    	return cpe
     	else
 	    	return 0
@@ -108,7 +114,7 @@ function func_check_cpe_form(cpe)
 		cpe_form = string.gsub(cpe,"-.*","")
 	    	return cpe_form
     	else
-		return "0"
+		return 0
     	end
 end
  
@@ -128,16 +134,16 @@ function func_check_cve(cpe)
 	status, vulnerabilities = json.parse(response.body)
 
 	if status ~= true then
-		return "1"
+		return 1
 	elseif type(next(vulnerabilities)) == "nil" then
-		return "2"
+		return 2
 	elseif (status == true and vulnerabilities ~= "") then
 		return func_output(vulnerabilities)
 	else	
-		return "2"
+		return 2
 	end
 
-end	
+end
 
 -- Function to generate the script output.
 function func_output(vulnerabilities)
@@ -149,6 +155,11 @@ function func_output(vulnerabilities)
 	local cvss_value
 	local osstmm_value
 	local url_value
+	local edb
+	local edb_test
+	local msf
+	local msf_test
+	local exploit
 	local i
 	local t
 
@@ -157,12 +168,37 @@ function func_output(vulnerabilities)
 		cvss_value = tonumber(t.cvss)
  		osstmm_value = func_osstmm(cvss_value)
  		url_value = cve_url .. t.id
- 		output_table = cve_value .. "\t" .. osstmm_value .. "\t" .. cvss_value .. "\t" .. url_value
+		edb_test = t["exploit-db"]
+		msf_test = t.metasploit
+		
+		if edb_test == nil then
+			edb = 0
+		else
+			edb = 1
+		end
+		
+		if msf_test == nil then
+			msf = 0
+		else
+			msf = 1
+		end
+ 		
+		if edb == 1 and msf == 1 then
+			exploit = "EDB MSF"
+		elseif edb == 1 and msf == 0 then
+			exploit = "EDB"
+		elseif edb == 0 and msf == 1 then
+			exploit = "MSF"
+		else
+			exploit = ""
+		end
+
+		output_table = cve_value .. "\t" .. osstmm_value .. "\t" .. cvss_value .. "\t" .. exploit .. "\t" .. url_value
 		input_table[i] = output_table 	
 	end
                        
 	return input_table
-end
+end          
 
 -- Function to assign CVSS values to OSSTMM categories
 function func_osstmm(cvss)
@@ -195,15 +231,15 @@ action = function(host, port)
 		check = func_check_cpe(cpe)
 		if check ~= 0 then
 			sort_values = func_check_cve(check)
-			if sort_values == "1" then
+			if sort_values == 1 then
 				return "Error with API query. API or network possibly not available."
-			elseif sort_values == "2" then
+			elseif sort_values == 2 then
 				form_cpe = func_check_cpe_form(check)
-				if form_cpe == "0" then
+				if form_cpe == 0 then
 					return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
 				else
 					sort_values = func_check_cve(form_cpe)
-					if sort_values == "2" then
+					if sort_values == 2 then
 						return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
 					else
 						table.sort(sort_values, function(a, b) return a>b end) --funktioniert
