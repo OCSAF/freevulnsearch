@@ -9,7 +9,7 @@ local json = require "json"
 
 description = [[
 
-This script [Version 1.0.1] allows you to automatically search for CVEs using the API of 
+This script [Version 1.0.2] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -21,7 +21,8 @@ and special thanks to the community for many useful ideas that speed up my codin
 
 Realized functions:
 Version 1.0 - Contains the basic functions to quickly find relevant CVEs.
-Version 1.0.1 - Includes EDB and MSF in output and minor changes
+Version 1.0.1 - Includes EDB and MSF in output and minor changes.
+Version 1.0.2 - Special CPE formatting and output optimization.
 
 Future functions:
 Version 1.1 - Shall contains optional sort by severity (CVSS)
@@ -108,13 +109,27 @@ end
 function func_check_cpe_form(cpe)
 	
 	local cpe_form
+	local sub_form1
+	local sub_form2
+	local sub_form3
+	local cpe_front
+	local cpe_version
     	
 	_, count = string.gsub(cpe, "-", " ")
+	_, count2 = string.gsub(cpe, "%a%d", " ")
 
     	if count ~= 0 then
 		cpe_form = string.gsub(cpe,"-.*","")
 	    	return cpe_form
-    	else
+    	elseif count2 ~= 0 then
+		sub_form1 = string.gsub(cpe,".*:",":")
+		sub_form2 = string.gsub(sub_form1,"%a.*","")
+		sub_form3 = string.gsub(sub_form1,sub_form2,"")
+		cpe_version = sub_form2 .. ":" .. sub_form3
+		cpe_front = string.gsub(cpe,sub_form1,"")
+		cpe_form = cpe_front .. cpe_version
+		return cpe_form
+	else
 		return 0
     	end
 end
@@ -153,45 +168,39 @@ function func_output(vulnerabilities)
 	local input_table = {}
 	local cve_url= "https://cve.circl.lu/cve/"
 	local cve_value
+	local cvss
 	local cvss_value
 	local osstmm_value
 	local url_value
 	local edb
-	local edb_test
 	local msf
-	local msf_test
 	local exploit
 	local i
 	local t
 
 	for i,t in ipairs(vulnerabilities) do
  		cve_value = t.id
-		cvss_value = tonumber(t.cvss)
- 		osstmm_value = func_osstmm(cvss_value)
+		cvss = tonumber(t.cvss)
  		url_value = cve_url .. t.id
-		edb_test = t["exploit-db"]
-		msf_test = t.metasploit
-		
-		if edb_test == nil then
-			edb = 0
+		edb = t["exploit-db"]
+		msf = t.metasploit
+
+		if not cvss then
+			cvss_value = ""
+			osstmm_value = ""
 		else
-			edb = 1
+ 			cvss_value = cvss	
+			osstmm_value = func_osstmm(cvss)
 		end
-		
-		if msf_test == nil then
-			msf = 0
-		else
-			msf = 1
-		end
- 		
-		if edb == 1 and msf == 1 then
-			exploit = "EDB MSF"
-		elseif edb == 1 and msf == 0 then
-			exploit = "EDB"
-		elseif edb == 0 and msf == 1 then
-			exploit = "MSF"
-		else
+
+		if not edb and not msf then
 			exploit = ""
+		elseif edb and not msf then
+			exploit = "EDB"
+		elseif not edb and msf then
+			exploit = "MSF"
+		elseif edb and msf then
+			exploit = "EDB MSF"
 		end
 
 		output_table = cve_value .. "\t" .. osstmm_value .. "\t" .. cvss_value .. "\t" .. exploit .. "\t" .. url_value
@@ -258,4 +267,3 @@ action = function(host, port)
 		end
 	end
 end
-
