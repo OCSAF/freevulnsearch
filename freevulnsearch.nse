@@ -265,13 +265,13 @@ action = function(host, port)
 					if sort_values == 2 then
 						return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
 					else
-						table.sort(sort_values, function(a, b) return a>b end) --funktioniert
+						table.sort(sort_values, function(a, b) return a>b end)
 						table.insert(sort_values, "(" .. form_cpe .. ")")
 						return sort_values
 					end
 				end
 			else
-				table.sort(sort_values, function(a, b) return a>b end) --funktioniert
+				table.sort(sort_values, function(a, b) return a>b end)
 				table.insert(sort_values, "(" .. check .. ")")
 				return sort_values
 			end
