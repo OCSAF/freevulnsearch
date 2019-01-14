@@ -25,15 +25,15 @@ Version 1.0.1 - Includes EDB and MSF in output and minor changes.
 Version 1.0.2 - Special CPE formatting and output optimization.
 
 Future functions:
-Version 1.1 - Shall contains optional sort by severity (CVSS)
-Version 2.0 - Shall support optional the offline DB of cve-search.org.
-Version 3.0 - Implementation of your useful ideas.
+Version 1.1 - Should support your own cve-search api.
+Version 1.2 - Shall contains optional sort by severity (CVSS)
+Version 1.3 - Implementation of your useful ideas.
 
 Usage:
 nmap -sV --script freevulnsearch <target>
 
 Output explanation:
-CVE-Number	CVSS	OSSTMM	 CVE-Link
+CVE-Number	CVSS	OSSTMM	EDB MSF CVE-Link
 
 CVE-Number:
 Common Vulnerabilities and Exposures
@@ -186,8 +186,8 @@ function func_output(vulnerabilities)
 		msf = t.metasploit
 
 		if not cvss then
-			cvss_value = ""
-			osstmm_value = ""
+			cvss_value = "none"
+			osstmm_value = "none"
 		else
  			cvss_value = cvss	
 			osstmm_value = func_osstmm(cvss)
