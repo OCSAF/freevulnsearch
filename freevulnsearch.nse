@@ -23,6 +23,7 @@ Realized functions:
 Version 1.0 - Contains the basic functions to quickly find relevant CVEs.
 Version 1.0.1 - Includes EDB and MSF in output and minor changes.
 Version 1.0.2 - Special CPE formatting and output optimization.
+Version 1.0.3 - Minor c
 
 Future functions:
 Version 1.1 - Should support your own cve-search api.
