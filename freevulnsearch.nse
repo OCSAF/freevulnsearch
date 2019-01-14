@@ -7,6 +7,11 @@ local table = require "table"
 local http = require "http"
 local json = require "json"
 
+-- Input Arguments
+
+local apipath = stdnse.get_script_args("freevulnsearch.apipath")
+
+
 description = [[
 
 This script [Version 1.0.2] allows you to automatically search for CVEs using the API of 
@@ -24,9 +29,9 @@ Version 1.0 - Contains the basic functions to quickly find relevant CVEs.
 Version 1.0.1 - Includes EDB and MSF in output and minor changes.
 Version 1.0.2 - Special CPE formatting and output optimization.
 Version 1.0.3 - Small adjustments
+Version 1.1 - Support your own cve-search api-link - https://<IP>/api/cvefor/
 
 Future functions:
-Version 1.1 - Should support your own cve-search api.
 Version 1.2 - Shall contains optional sort by severity (CVSS)
 Version 1.3 - Implementation of your useful ideas.
 
@@ -69,6 +74,7 @@ categories = {"safe", "vuln", "external"}
 
 -- @usage 
 -- nmap -sV --script freevulnsearch [--script-args cvss=<min_cvss_value>] <target>
+-- nmap -sV --script freevulnsearch [--script-args apipath=<url>] <target>
 --
 -- @output
 --
@@ -137,12 +143,18 @@ end
  
 -- Function to query CVEs via CPEs with API (circl.lu).
 function func_check_cve(cpe)
-	
-	local url = "https://cve.circl.lu/api/cvefor/"
+
+	local url
 	local response
 	local request
 	local status
 	local vulnerabilities
+	
+	if not apipath then
+		url = "https://cve.circl.lu/api/cvefor/"
+	else
+		url = apipath
+	end
 
 	request = url .. cpe
 
