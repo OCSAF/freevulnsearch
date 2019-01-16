@@ -14,7 +14,7 @@ local apipath = stdnse.get_script_args("freevulnsearch.apipath")
 
 description = [[
 
-This script [Version 1.0.2] allows you to automatically search for CVEs using the API of 
+This script [Version 1.1.1] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -30,6 +30,7 @@ Version 1.0.1 - Includes EDB and MSF in output and minor changes.
 Version 1.0.2 - Special CPE formatting and output optimization.
 Version 1.0.3 - Small adjustments
 Version 1.1 - Support your own cve-search api-link - https://<IP>/api/cvefor/
+Version 1.1.1 - Adaptation to CVSS rating instead of OSSTMM - Input from the community, thanks
 
 Future functions:
 Version 1.2 - Shall contains optional sort by severity (CVSS)
@@ -39,18 +40,17 @@ Usage:
 nmap -sV --script freevulnsearch <target>
 
 Output explanation:
-CVE-Number	CVSS	OSSTMM	EDB MSF CVE-Link
+CVE-Number	Rating	CVSS	EDB MSF CVE-Link
 
 CVE-Number:
 Common Vulnerabilities and Exposures
 
-OSSTMM:
-OSSTMM Category derived from CVSS
-Vulnerability (CVSS 8.0 - 10.0)
-Weakness (CVSS 6.0 - 7.9)
-Concerns (CVSS 4.0 - 5.9)
-Exposure (CVSS 2.0 - 3.9)
-Information (CVSS 0.0 - 1.9)
+CVSS v3.0 Ratings:
+Critical (CVSS 9.0 - 10.0)
+High (CVSS 7.0 - 8.9)
+Medium (CVSS 4.0 - 6.9)
+Low (CVSS 0.1 - 3.9)
+None (CVSS 0.0)
 
 CVSS:
 Common Vulnerability Scoring System with with the level of severty from 0.0 - 10.0
@@ -72,20 +72,19 @@ license = "Same as Nmap--See https://nmap.org/book/man-legal.html"
 
 categories = {"safe", "vuln", "external"}
 
--- @usage 
--- nmap -sV --script freevulnsearch [--script-args cvss=<min_cvss_value>] <target>
+-- @usage
 -- nmap -sV --script freevulnsearch [--script-args apipath=<url>] <target>
 --
 -- @output
 --
 -- 22/tcp   open  ssh     OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
 -- | freevulnsearch: 
--- |   CVE-2018-15473	Concerns	5.0	EDB MSF	https://cve.circl.lu/cve/CVE-2018-15473
--- |   CVE-2017-15906	Concerns	5.0		https://cve.circl.lu/cve/CVE-2017-15906
--- |   CVE-2016-10708	Concerns	5.0		https://cve.circl.lu/cve/CVE-2016-10708
--- |   CVE-2010-4755	Concerns	4.0		https://cve.circl.lu/cve/CVE-2010-4755
--- |   CVE-2010-4478	Weakness	7.5		https://cve.circl.lu/cve/CVE-2010-4478
--- |   CVE-2008-5161	Exposure	2.6		https://cve.circl.lu/cve/CVE-2008-5161
+-- |   CVE-2018-15473	Medium		5.0	EDB MSF	https://cve.circl.lu/cve/CVE-2018-15473
+-- |   CVE-2017-15906	Medium		5.0		https://cve.circl.lu/cve/CVE-2017-15906
+-- |   CVE-2016-10708	Medium		5.0		https://cve.circl.lu/cve/CVE-2016-10708
+-- |   CVE-2010-4755	Medium		4.0		https://cve.circl.lu/cve/CVE-2010-4755
+-- |   CVE-2010-4478	High		7.5		https://cve.circl.lu/cve/CVE-2010-4478
+-- |   CVE-2008-5161	Low		2.6		https://cve.circl.lu/cve/CVE-2008-5161
 -- |_  (cpe:/a:openbsd:openssh:4.7p1)
 --
 
@@ -199,11 +198,11 @@ function func_output(vulnerabilities)
 		msf = t.metasploit
 
 		if not cvss then
-			cvss_value = "none"
-			osstmm_value = "none"
+			cvss_value = "None"
+			osstmm_value = "None"
 		else
  			cvss_value = cvss	
-			osstmm_value = func_osstmm(cvss)
+			osstmm_value = func_rating(cvss)
 		end
 
 		if not edb and not msf then
@@ -223,19 +222,19 @@ function func_output(vulnerabilities)
 	return input_table
 end          
 
--- Function to assign CVSS values to OSSTMM categories
-function func_osstmm(cvss)
+-- Function to assign CVSS values to CVSS V3.0 ratings
+function func_rating(cvss)
 
-	if (1.9 >= cvss and cvss >= 0.0) then
-		return "Information"
-	elseif (3.9 >= cvss and cvss >= 2.0) then
-		return "Exposure"
-	elseif (5.9 >= cvss and cvss >= 4.0) then
-		return "Concerns"
-	elseif (7.9 >= cvss and cvss >= 6.0) then
-		return "Weakness"
-	elseif (10.0 >= cvss and cvss >= 8.0) then
-		return "Vulnerability"
+	if (cvss == 0.0) then
+		return "None\t"
+	elseif (3.9 >= cvss and cvss >= 0.1) then
+		return "Low\t"
+	elseif (6.9 >= cvss and cvss >= 4.0) then
+		return "Medium\t"
+	elseif (8.9 >= cvss and cvss >= 7.0) then
+		return "High\t"
+	elseif (10.0 >= cvss and cvss >= 9.0) then
+		return "Critical"
 	end
 end
 
