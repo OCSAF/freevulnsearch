@@ -182,7 +182,7 @@ function func_output(vulnerabilities)
 	local cve_value
 	local cvss
 	local cvss_value
-	local osstmm_value
+	local cvss_rating
 	local url_value
 	local edb
 	local msf
@@ -199,10 +199,10 @@ function func_output(vulnerabilities)
 
 		if not cvss then
 			cvss_value = "None"
-			osstmm_value = "None"
+			cvss_rating = "None"
 		else
  			cvss_value = cvss	
-			osstmm_value = func_rating(cvss)
+			cvss_rating = func_rating(cvss)
 		end
 
 		if not edb and not msf then
@@ -215,7 +215,7 @@ function func_output(vulnerabilities)
 			exploit = "EDB MSF"
 		end
 
-		output_table = cve_value .. "\t" .. osstmm_value .. "\t" .. cvss_value .. "\t" .. exploit .. "\t" .. url_value
+		output_table = cve_value .. "\t" .. cvss_rating .. "\t" .. cvss_value .. "\t" .. exploit .. "\t" .. url_value
 		input_table[i] = output_table 	
 	end
                        
