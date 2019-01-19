@@ -289,7 +289,7 @@ action = function(host, port)
 					if known_vuln == 0 then
 						return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
 					else
-						return "\n  " .. known_vuln	
+						return "\n  " .. known_vuln .. "\n  *No CVEs found with CPE (" .. check .. ")"	
 					end
 				else
 					sort_values = func_check_cve(form_cpe)
