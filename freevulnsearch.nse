@@ -289,7 +289,6 @@ action = function(host, port)
 					if known_vuln == 0 then
 						return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
 					else
-					--	table.insert(known_vuln)
 						return "\n  " .. known_vuln	
 					end
 				else
