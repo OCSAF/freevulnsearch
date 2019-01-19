@@ -14,7 +14,7 @@ local apipath = stdnse.get_script_args("freevulnsearch.apipath")
 
 description = [[
 
-This script [Version 1.1.1] allows you to automatically search for CVEs using the API of 
+This script [Version 1.1.2] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -31,6 +31,7 @@ Version 1.0.2 - Special CPE formatting and output optimization.
 Version 1.0.3 - Small adjustments
 Version 1.1 - Support your own cve-search api-link - https://<IP>/api/cvefor/
 Version 1.1.1 - Adaptation to CVSS rating instead of OSSTMM - Input from the community, thanks
+Version 1.1.2 - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
 
 Future functions:
 Version 1.2 - Shall contains optional sort by severity (CVSS)
@@ -123,6 +124,7 @@ function func_check_cpe_form(cpe)
     	
 	_, count = string.gsub(cpe, "-", " ")
 	_, count2 = string.gsub(cpe, "%a%d", " ")
+	_, count3 = string.gsub(cpe, "%d%a", " ")
 
     	if count ~= 0 then
 		cpe_form = string.gsub(cpe,"-.*","")
@@ -132,6 +134,13 @@ function func_check_cpe_form(cpe)
 		sub_form2 = string.gsub(sub_form1,"%a.*","")
 		sub_form3 = string.gsub(sub_form1,sub_form2,"")
 		cpe_version = sub_form2 .. ":" .. sub_form3
+		cpe_front = string.gsub(cpe,sub_form1,"")
+		cpe_form = cpe_front .. cpe_version
+		return cpe_form
+	elseif count3 ~= 0 then
+		sub_form1 = string.gsub(cpe,".*:",":")
+		sub_form2 = string.gsub(sub_form1,"%d.*","")
+		cpe_version = string.gsub(sub_form1,sub_form2,"")
 		cpe_front = string.gsub(cpe,sub_form1,"")
 		cpe_form = cpe_front .. cpe_version
 		return cpe_form
@@ -265,7 +274,8 @@ action = function(host, port)
 						return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
 					else
 						table.sort(sort_values, function(a, b) return a>b end)
-						table.insert(sort_values, "(" .. form_cpe .. ")")
+						table.insert(sort_values, "*No CVEs found with NMAP-CPE (" ..check .. ")")
+						table.insert(sort_values, "*Tested with freevulnsearch function (" .. form_cpe .. ")")
 						return sort_values
 					end
 				end
