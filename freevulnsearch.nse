@@ -273,7 +273,7 @@ action = function(host, port)
 	local check
 	local sort_values
 	local form_cpe
-	local known_vuln = {}
+	local known_vuln
 	local i
 
 	for i, cpe in ipairs(port.version.cpe) do
