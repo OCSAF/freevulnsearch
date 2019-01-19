@@ -125,6 +125,7 @@ function func_check_cpe_form(cpe)
 	_, count = string.gsub(cpe, "-", " ")
 	_, count2 = string.gsub(cpe, "%a%d", " ")
 	_, count3 = string.gsub(cpe, "%d%a", " ")
+	_, count4 = string.gsub(cpe, "httpfileserver", " ")
 
     	if count ~= 0 then
 		cpe_form = string.gsub(cpe,"-.*","")
@@ -144,9 +145,25 @@ function func_check_cpe_form(cpe)
 		cpe_front = string.gsub(cpe,sub_form1,"")
 		cpe_form = cpe_front .. cpe_version
 		return cpe_form
+	elseif count4 ~= 0 then
+		cpe_form = string.gsub(cpe,"httpfileserver","http_file_server")
+		return cpe_form
 	else
 		return 0
     	end
+end
+ 
+-- Function to check for known vulnerabilities without CVE
+function func_check_known_vuln(cpe)
+	
+	local cpe_vuln
+    	
+		if cpe == "cpe:/a:vsftpd:vsftpd:2.3.4" then
+			cpe_vuln = "EDB-ID-17491\t" .. "Critical\t" .. "None\t" .. "EDB MSF\t" .. "https://www.exploit-db.com/exploits/17491"
+			return cpe_vuln
+		else
+			return 0
+		end
 end
  
 -- Function to query CVEs via CPEs with API (circl.lu).
@@ -256,6 +273,7 @@ action = function(host, port)
 	local check
 	local sort_values
 	local form_cpe
+	local known_vuln = {}
 	local i
 
 	for i, cpe in ipairs(port.version.cpe) do
@@ -267,7 +285,13 @@ action = function(host, port)
 			elseif sort_values == 2 then
 				form_cpe = func_check_cpe_form(check)
 				if form_cpe == 0 then
-					return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
+					known_vuln =func_check_known_vuln(check)
+					if known_vuln == 0 then
+						return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
+					else
+					--	table.insert(known_vuln)
+						return "\n  " .. known_vuln	
+					end
 				else
 					sort_values = func_check_cve(form_cpe)
 					if sort_values == 2 then
