@@ -125,7 +125,7 @@ function func_check_cpe_form(cpe)
     	
 	_, count1 = string.gsub(cpe, ".*:.*-", " ")
 	_, count2 = string.gsub(cpe, ".*:.*_", " ")
-	_, count3 = string.gsub(cpe, ".*:.*%d%a%d", " ")
+	_, count3 = string.gsub(cpe, ".*:.*%..*%.%d%a%d", " ")
 	_, count4 = string.gsub(cpe, ".*:.*%a%d", " ")
 	_, count5 = string.gsub(cpe, ".*:.*%d%a", " ")
 	_, count6 = string.gsub(cpe, "httpfileserver", " ")
