@@ -123,14 +123,20 @@ function func_check_cpe_form(cpe)
 	local cpe_front
 	local cpe_version
     	
-	_, count1 = string.gsub(cpe, ".*:.*%d%a%d", " ")
-	_, count2 = string.gsub(cpe, ".*:.*%a%d", " ")
-	_, count3 = string.gsub(cpe, ".*:.*%d%a", " ")
-	_, count4 = string.gsub(cpe, "httpfileserver", " ")
-	_, count5 = string.gsub(cpe, ".*:.*-", " ")
-	_, count6 = string.gsub(cpe, ".*:.*_", " ")
+	_, count1 = string.gsub(cpe, ".*:.*-", " ")
+	_, count2 = string.gsub(cpe, ".*:.*_", " ")
+	_, count3 = string.gsub(cpe, ".*:.*%d%a%d", " ")
+	_, count4 = string.gsub(cpe, ".*:.*%a%d", " ")
+	_, count5 = string.gsub(cpe, ".*:.*%d%a", " ")
+	_, count6 = string.gsub(cpe, "httpfileserver", " ")
 
-    	if count1 ~= 0 then					-- (OpenSSH) 6.6.1p1 -to- 6.6:p1
+	if count1 ~= 0 then					-- (MySQL) 5.0.51a-3ubuntu5 -to- 5.0.51a
+		cpe_form = string.gsub(cpe,"-.*","")
+	    	return cpe_form
+	elseif count2 ~= 0 then					-- (Exim smtpd) 4.90_1 -to- 4.90
+		cpe_form = string.gsub(cpe,"_.*","")
+	    	return cpe_form
+	elseif count3 ~= 0 then					-- (OpenSSH) 6.6.1p1 -to- 6.6:p1
 		sub_form1 = string.gsub(cpe,".*:",":")					
 		sub_form2 = string.gsub(sub_form1,"%.%d%a%d.*","")
 		sub_form3 = string.gsub(sub_form1,".*%.%d","")
@@ -138,7 +144,7 @@ function func_check_cpe_form(cpe)
 		cpe_front = string.gsub(cpe,sub_form1,"")
 		cpe_form = cpe_front .. cpe_version
 		return cpe_form
-    	elseif count2 ~= 0 then					-- (OpenSSH) 7.5p1 -to- 7.5:p1
+    	elseif count4 ~= 0 then					-- (OpenSSH) 7.5p1 -to- 7.5:p1
 		sub_form1 = string.gsub(cpe,".*:",":")
 		sub_form2 = string.gsub(sub_form1,"%a.*","")
 		sub_form3 = string.gsub(sub_form1,sub_form2,"")
@@ -146,22 +152,16 @@ function func_check_cpe_form(cpe)
 		cpe_front = string.gsub(cpe,sub_form1,"")
 		cpe_form = cpe_front .. cpe_version
 		return cpe_form
-	elseif count3 ~= 0 then					-- (ProFTPD) 1.3.5a -to- 1.3.5
+	elseif count5 ~= 0 then					-- (ProFTPD) 1.3.5a -to- 1.3.5
 		sub_form1 = string.gsub(cpe,".*:",":")
 		sub_form2 = string.gsub(sub_form1,"%d.*","")
 		cpe_version = string.gsub(sub_form1,sub_form2,"")
 		cpe_front = string.gsub(cpe,sub_form1,"")
 		cpe_form = cpe_front .. cpe_version
 		return cpe_form
-	elseif count4 ~= 0 then
+	elseif count6 ~= 0 then
 		cpe_form = string.gsub(cpe,"httpfileserver","http_file_server")
 		return cpe_form
-	elseif count5 ~= 0 then					-- (MySQL) 5.0.51a-3ubuntu5 -to- 5.0.51a
-		cpe_form = string.gsub(cpe,"-.*","")
-	    	return cpe_form
-	elseif count6 ~= 0 then					-- (Exim smtpd) 4.90_1 -to- 4.90
-		cpe_form = string.gsub(cpe,"_.*","")
-	    	return cpe_form
 	else
 		return 0
     	end
