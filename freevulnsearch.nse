@@ -14,7 +14,7 @@ local apipath = stdnse.get_script_args("freevulnsearch.apipath")
 
 description = [[
 
-This script [Version 1.1.2] allows you to automatically search for CVEs using the API of 
+This script [Version 1.1.3] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -32,6 +32,7 @@ Version 1.0.3 - Small adjustments
 Version 1.1 - Support your own cve-search api-link - https://<IP>/api/cvefor/
 Version 1.1.1 - Adaptation to CVSS rating instead of OSSTMM - Input from the community, thanks
 Version 1.1.2 - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
+Version 1.1.3 - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
 
 Future functions:
 Version 1.2 - Shall contains optional sort by severity (CVSS)
@@ -101,7 +102,7 @@ end
 
 
 
--- Function to check for CPE correct version.
+-- Function to check if a version number exists at the CPE
 function func_check_cpe(cpe)
 	
 	_, count = string.gsub(cpe, ":", " ")
@@ -122,15 +123,22 @@ function func_check_cpe_form(cpe)
 	local cpe_front
 	local cpe_version
     	
-	_, count = string.gsub(cpe, "-", " ")
-	_, count2 = string.gsub(cpe, "%a%d", " ")
-	_, count3 = string.gsub(cpe, "%d%a", " ")
+	_, count1 = string.gsub(cpe, ".*:.*%d%a%d", " ")
+	_, count2 = string.gsub(cpe, ".*:.*%a%d", " ")
+	_, count3 = string.gsub(cpe, ".*:.*%d%a", " ")
 	_, count4 = string.gsub(cpe, "httpfileserver", " ")
+	_, count5 = string.gsub(cpe, ".*:.*-", " ")
+	_, count6 = string.gsub(cpe, ".*:.*_", " ")
 
-    	if count ~= 0 then
-		cpe_form = string.gsub(cpe,"-.*","")
-	    	return cpe_form
-    	elseif count2 ~= 0 then
+    	if count1 ~= 0 then					-- (OpenSSH) 6.6.1p1 -to- 6.6:p1
+		sub_form1 = string.gsub(cpe,".*:",":")					
+		sub_form2 = string.gsub(sub_form1,"%.%d%a%d.*","")
+		sub_form3 = string.gsub(sub_form1,".*%.%d","")
+		cpe_version = sub_form2 .. ":" .. sub_form3
+		cpe_front = string.gsub(cpe,sub_form1,"")
+		cpe_form = cpe_front .. cpe_version
+		return cpe_form
+    	elseif count2 ~= 0 then					-- (OpenSSH) 7.5p1 -to- 7.5:p1
 		sub_form1 = string.gsub(cpe,".*:",":")
 		sub_form2 = string.gsub(sub_form1,"%a.*","")
 		sub_form3 = string.gsub(sub_form1,sub_form2,"")
@@ -138,7 +146,7 @@ function func_check_cpe_form(cpe)
 		cpe_front = string.gsub(cpe,sub_form1,"")
 		cpe_form = cpe_front .. cpe_version
 		return cpe_form
-	elseif count3 ~= 0 then
+	elseif count3 ~= 0 then					-- (ProFTPD) 1.3.5a -to- 1.3.5
 		sub_form1 = string.gsub(cpe,".*:",":")
 		sub_form2 = string.gsub(sub_form1,"%d.*","")
 		cpe_version = string.gsub(sub_form1,sub_form2,"")
@@ -148,6 +156,12 @@ function func_check_cpe_form(cpe)
 	elseif count4 ~= 0 then
 		cpe_form = string.gsub(cpe,"httpfileserver","http_file_server")
 		return cpe_form
+	elseif count5 ~= 0 then					-- (MySQL) 5.0.51a-3ubuntu5 -to- 5.0.51a
+		cpe_form = string.gsub(cpe,"-.*","")
+	    	return cpe_form
+	elseif count6 ~= 0 then					-- (Exim smtpd) 4.90_1 -to- 4.90
+		cpe_form = string.gsub(cpe,"_.*","")
+	    	return cpe_form
 	else
 		return 0
     	end
@@ -285,7 +299,7 @@ action = function(host, port)
 			elseif sort_values == 2 then
 				form_cpe = func_check_cpe_form(check)
 				if form_cpe == 0 then
-					known_vuln =func_check_known_vuln(check)
+					known_vuln = func_check_known_vuln(check)
 					if known_vuln == 0 then
 						return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
 					else
