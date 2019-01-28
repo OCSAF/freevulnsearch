@@ -310,7 +310,7 @@ action = function(host, port)
 						return "\n  *No CVE found with NMAP-CPE: (" .. check .. ")" ..
 						"\n  *Check other sources like https://www.exploit-db.com"
 					else
-						return "\n  " .. known_vuln .. "\n  *No CVE found with CPE (" .. check .. ")"	
+						return "\n  " .. known_vuln .. "\n  *No CVE found with CPE: (" .. check .. ")"	
 					end
 				else
 					sort_values = func_check_cve(form_cpe)
@@ -331,7 +331,7 @@ action = function(host, port)
 				return sort_values
 			end
 		elseif check == 0 then
-			return "\n  *Check unspecific version manually: [".. cpe .. "]"
+			return "\n  *Check unspecific version manually: (".. cpe .. ")"
 		end
 	end
 end
