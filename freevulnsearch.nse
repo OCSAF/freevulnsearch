@@ -14,7 +14,7 @@ local apipath = stdnse.get_script_args("freevulnsearch.apipath")
 
 description = [[
 
-This script [Version 1.1.3a] allows you to automatically search for CVEs using the API of 
+This script [Version 1.1.3b] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -32,7 +32,7 @@ Version 1.0.3 - Small adjustments
 Version 1.1 - Support your own cve-search api-link - https://<IP>/api/cvefor/
 Version 1.1.1 - Adaptation to CVSS rating instead of OSSTMM - Input from the community, thanks
 Version 1.1.2 - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
-Version 1.1.3a - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
+Version 1.1.3b - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
 
 Future functions:
 Version 1.2 - Shall contains optional sort by severity (CVSS)
@@ -87,7 +87,7 @@ categories = {"safe", "vuln", "external"}
 -- |   CVE-2010-4755	Medium		4.0		https://cve.circl.lu/cve/CVE-2010-4755
 -- |   CVE-2010-4478	High		7.5		https://cve.circl.lu/cve/CVE-2010-4478
 -- |   CVE-2008-5161	Low		2.6		https://cve.circl.lu/cve/CVE-2008-5161
--- |_  (cpe:/a:openbsd:openssh:4.7p1)
+-- |_  *CVE found with NMAP-CPE: (cpe:/a:openbsd:openssh:4.7p1)
 --
 
 
@@ -301,34 +301,37 @@ action = function(host, port)
 		if check ~= 0 then
 			sort_values = func_check_cve(check)
 			if sort_values == 1 then
-				return "Error with API query. API or network possibly not available."
+				return "*Error with API query. API or network possibly not available."
 			elseif sort_values == 2 then
 				form_cpe = func_check_cpe_form(check)
 				if form_cpe == 0 then
 					known_vuln = func_check_known_vuln(check)
 					if known_vuln == 0 then
-						return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
+						return "\n  *No CVE found with NMAP-CPE: (" .. check .. ")" ..
+						"\n  *Check other sources like https://www.exploit-db.com"
 					else
-						return "\n  " .. known_vuln .. "\n  *No CVEs found with CPE (" .. check .. ")"	
+						return "\n  " .. known_vuln .. "\n  *No CVE found with CPE (" .. check .. ")"	
 					end
 				else
 					sort_values = func_check_cve(form_cpe)
 					if sort_values == 2 then
-						return "\n  No CVEs found with CPE: [" .. check .. "]" .. "\n  Check other sources like https://www.exploit-db.com"
+						return "\n  *No CVE found with NMAP-CPE: (" .. check .. ")" .. 
+						"\n  *No CVE found with freevulnsearch function: (" .. form_cpe .. ")" ..
+						"\n  *Check other sources like https://www.exploit-db.com"
 					else
 						table.sort(sort_values, function(a, b) return a>b end)
-						table.insert(sort_values, "*No CVEs found with NMAP-CPE (" ..check .. ")")
-						table.insert(sort_values, "*Tested with freevulnsearch function (" .. form_cpe .. ")")
+						table.insert(sort_values, "*No CVE found with NMAP-CPE: (" ..check .. ")")
+						table.insert(sort_values, "*CVE found with freevulnsearch function: (" .. form_cpe .. ")")
 						return sort_values
 					end
 				end
 			else
 				table.sort(sort_values, function(a, b) return a>b end)
-				table.insert(sort_values, "(" .. check .. ")")
+				table.insert(sort_values, "*CVE found with NMAP-CPE: (" ..check .. ")")
 				return sort_values
 			end
 		elseif check == 0 then
-			return "\n  Check unspecific version manually: [".. cpe .. "]"
+			return "\n  *Check unspecific version manually: [".. cpe .. "]"
 		end
 	end
 end
