@@ -14,7 +14,7 @@ local apipath = stdnse.get_script_args("freevulnsearch.apipath")
 
 description = [[
 
-This script [Version 1.1.3] allows you to automatically search for CVEs using the API of 
+This script [Version 1.1.3a] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -32,7 +32,7 @@ Version 1.0.3 - Small adjustments
 Version 1.1 - Support your own cve-search api-link - https://<IP>/api/cvefor/
 Version 1.1.1 - Adaptation to CVSS rating instead of OSSTMM - Input from the community, thanks
 Version 1.1.2 - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
-Version 1.1.3 - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
+Version 1.1.3a - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
 
 Future functions:
 Version 1.2 - Shall contains optional sort by severity (CVSS)
@@ -124,20 +124,26 @@ function func_check_cpe_form(cpe)
 	local cpe_version
     	
 	_, count1 = string.gsub(cpe, ":httpfileserver:", " ")
-	_, count2 = string.gsub(cpe, ".*:.*-", " ")
-	_, count3 = string.gsub(cpe, ".*:.*_", " ")
-	_, count4 = string.gsub(cpe, ".*:.*%..*%.%d%a%d", " ")
-	_, count5 = string.gsub(cpe, ".*:.*%a%d", " ")
-	_, count6 = string.gsub(cpe, ".*:.*%d%a", " ")
+	_, count2 = string.gsub(cpe, ".*:.*:.*:.*:.*-", " ")
+	_, count3 = string.gsub(cpe, ".*:.*:.*:.*:.*_", " ")
+	_, count4 = string.gsub(cpe, ".*:.*:.*:.*:.*%..*%.%d%a%d", " ")
+	_, count5 = string.gsub(cpe, ".*:.*:.*:.*:.*%a%d", " ")
+	_, count6 = string.gsub(cpe, ".*:.*:.*:.*:.*%d%a", " ")
 
 	if count1 ~= 0 then
 		cpe_form = string.gsub(cpe,"httpfileserver","http_file_server")
 		return cpe_form
 	elseif count2 ~= 0 then					-- (MySQL) 5.0.51a-3ubuntu5 -to- 5.0.51a
-		cpe_form = string.gsub(cpe,"-.*","")
+		sub_form1 = string.gsub(cpe,".*:",":")					
+		cpe_version = string.gsub(sub_form1,"-.*","")
+		cpe_front = string.gsub(cpe,cpe_version .. ".*","")
+		cpe_form = cpe_front .. cpe_version
 	    	return cpe_form
 	elseif count3 ~= 0 then					-- (Exim smtpd) 4.90_1 -to- 4.90
-		cpe_form = string.gsub(cpe,"_.*","")
+		sub_form1 = string.gsub(cpe,".*:",":")					
+		cpe_version = string.gsub(sub_form1,"_.*","")
+		cpe_front = string.gsub(cpe,cpe_version .. ".*","")
+		cpe_form = cpe_front .. cpe_version
 	    	return cpe_form
 	elseif count4 ~= 0 then					-- (OpenSSH) 6.6.1p1 -to- 6.6:p1
 		sub_form1 = string.gsub(cpe,".*:",":")					
