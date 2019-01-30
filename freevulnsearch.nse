@@ -10,11 +10,12 @@ local json = require "json"
 -- Input Arguments
 
 local apipath = stdnse.get_script_args("freevulnsearch.apipath")
-
+local summary = stdnse.get_script_args("freevulnsearch.summary")
+local xmlhtml = stdnse.get_script_args("freevulnsearch.xmlhtml")
 
 description = [[
 
-This script [Version 1.1.3b] allows you to automatically search for CVEs using the API of 
+This script [Version 1.1.4] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -33,6 +34,7 @@ Version 1.1 - Support your own cve-search api-link - https://<IP>/api/cvefor/
 Version 1.1.1 - Adaptation to CVSS rating instead of OSSTMM - Input from the community, thanks
 Version 1.1.2 - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
 Version 1.1.3b - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
+Version 1.1.4 - Optimization for OCSAF freevulnaudit.sh project.
 
 Future functions:
 Version 1.2 - Shall contains optional sort by severity (CVSS)
@@ -90,7 +92,6 @@ categories = {"safe", "vuln", "external"}
 -- |_  *CVE found with NMAP-CPE: (cpe:/a:openbsd:openssh:4.7p1)
 --
 
-
 -- Portrule
 
 -- The table port.version contains the CPEs
@@ -99,8 +100,6 @@ portrule = function(host, port)
 	local portv=port.version
 	return portv ~= nil and portv.version ~= nil
 end
-
-
 
 -- Function to check if a version number exists at the CPE
 function func_check_cpe(cpe)
@@ -216,7 +215,6 @@ function func_check_cve(cpe)
 	else	
 		return 2
 	end
-
 end
 
 -- Function to generate the script output.
@@ -233,8 +231,17 @@ function func_output(vulnerabilities)
 	local edb
 	local msf
 	local exploit
+	local sum
+	local cwe
+	local xmlhtml_out
 	local i
 	local t
+	
+	if not xmlhtml then
+		xmlhtml_out = ""
+	else
+		xmlhtml_out = " "
+	end
 
 	for i,t in ipairs(vulnerabilities) do
  		cve_value = t.id
@@ -261,7 +268,22 @@ function func_output(vulnerabilities)
 			exploit = "EDB MSF"
 		end
 
-		output_table = cve_value .. "\t" .. cvss_rating .. "\t" .. cvss_value .. "\t" .. exploit .. "\t" .. url_value
+		if not summary then
+			output_table = cve_value .. xmlhtml_out .. "\t" .. cvss_rating .. "\t" .. cvss_value .. "\t" .. exploit .. "\t" .. url_value
+		else
+			sum = t.summary
+			
+			if not t.cwe then
+				output_table = cve_value .. xmlhtml_out .. "\t" .. cvss_rating .. "\t" .. cvss_value .. "\t" .. exploit .. "\t" .. url_value ..
+				"\n  *SUMMARY: " .. sum .. "\n"
+			else
+				cwe = t.cwe
+				output_table = cve_value .. xmlhtml_out .. "\t" .. cvss_rating .. "\t" .. cvss_value .. "\t" .. exploit .. "\t" .. url_value ..
+				"\n  *CWE: " .. cwe ..
+				"\n  *SUMMARY: " .. sum .. "\n"
+			end
+		end
+
 		input_table[i] = output_table 	
 	end
                        
