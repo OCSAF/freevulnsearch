@@ -10,13 +10,13 @@ local json = require "json"
 -- Input Arguments
 
 local apipath = stdnse.get_script_args("freevulnsearch.apipath")
-local tls = stdnse.get_script_args("freevulnsearch.tls")
+local notls = stdnse.get_script_args("freevulnsearch.notls")
 local summary = stdnse.get_script_args("freevulnsearch.summary")
 local xmlhtml = stdnse.get_script_args("freevulnsearch.xmlhtml")
 
 description = [[
 
-This script [Version 1.1.6] allows you to automatically search for CVEs using the API of 
+This script [Version 1.1.6a] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -38,6 +38,7 @@ Version 1.1.3b - Special CPE formatting - Many thanks to Tore (cr33y) for testin
 Version 1.1.4 - Optimization for OCSAF freevulnaudit.sh project.
 Version 1.1.5 - Assignment to external category only
 Version 1.1.6 - Adaptation API to http and tls as option
+Version 1.1.6a - Adaptation API to tls and http as option
 
 Future functions:
 Version 1.2 - Shall contains optional sort by severity (CVSS)
@@ -81,7 +82,7 @@ categories = {"safe", "vuln", "external"}
 
 -- @usage
 -- nmap -sV --script freevulnsearch [--script-args apipath=<url>] <target>
--- nmap -sV --script freevulnsearch [--script-args tls=yes] <target>
+-- nmap -sV --script freevulnsearch [--script-args notls=yes] <target>
 -- nmap -sV --script freevulnsearch [--script-args summary=yes] <target>
 -- nmap -sV --script freevulnsearch [--script-args xmlhmtl=yes] <target>
 --
@@ -201,10 +202,10 @@ function func_check_cve(cpe)
 	local vulnerabilities
 	
 	if not apipath then
-		if not tls then
-			url = "http://cve.circl.lu/api/cvefor/"
-		else
+		if not notls then
 			url = "https://cve.circl.lu/api/cvefor/"
+		else
+			url = "http://cve.circl.lu/api/cvefor/"
 		end
 	else
 		url = apipath
