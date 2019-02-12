@@ -12,11 +12,11 @@ The CVEs are queried by default using the CPEs determined by NMAP via the ingeni
 
 ## Confidentiality information:
 
-The queries are made using the determined CPE via HTTP. For stability reasons, the connection is not secured by TLS encryption (https). For further information on the confidentiality of the circl.lu API, please visit https://www.circl.lu/services/cve-search/ directly.
+The queries are made using the determined CPE via the circl.lu API. According to my tests, for stability reasons, only http without TLS should be used when querying the API for many simultaneous requests.
 
-You can optionally activate the query via TLS using the input argument tls.
+For this reason, you can optionally disable TLS using an input argument.
 
-    nmap -sV --script freevulnsearch --script-args tls=yes <target>
+    nmap -sV --script freevulnsearch --script-args notls=yes <target>
 
 If you scan with the categories safe or vuln then exclude the script or the category external or do not add the script to the NMAP default directory.
 
