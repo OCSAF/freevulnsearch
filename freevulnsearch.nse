@@ -15,7 +15,7 @@ local xmlhtml = stdnse.get_script_args("freevulnsearch.xmlhtml")
 
 description = [[
 
-This script [Version 1.1.4] allows you to automatically search for CVEs using the API of 
+This script [Version 1.1.5] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -35,6 +35,7 @@ Version 1.1.1 - Adaptation to CVSS rating instead of OSSTMM - Input from the com
 Version 1.1.2 - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
 Version 1.1.3b - Special CPE formatting - Many thanks to Tore (cr33y) for testing.
 Version 1.1.4 - Optimization for OCSAF freevulnaudit.sh project.
+Version 1.1.5 - Assignment to external category only
 
 Future functions:
 Version 1.2 - Shall contains optional sort by severity (CVSS)
@@ -74,7 +75,7 @@ author = "Mathias Gut"
 
 license = "Same as Nmap--See https://nmap.org/book/man-legal.html"
 
-categories = {"safe", "vuln", "external"}
+categories = {"external"}
 
 -- @usage
 -- nmap -sV --script freevulnsearch [--script-args apipath=<url>] <target>
