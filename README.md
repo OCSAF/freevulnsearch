@@ -10,17 +10,29 @@ This NMAP NSE script is part of the Free OCSAF project - https://freecybersecuri
 
 The CVEs are queried by default using the CPEs determined by NMAP via the ingenious and public API of the cve-search.org project, which is provided by circl.lu. For more information visit https://www.cve-search.org/api/ .
 
-**Installation:**
+## Installation:
 
-Simply copy the NSE script freevulnsearch.nse into the corresponding script directory of the NMAP installation.
-* In KALI LINUX™ for example: /usr/share/nmap/scripts/
+You can either specify the script path directly in the NMAP command, for example
 
-**Usage:**
+    nmap -sV --script ~/freevulnsearch <target>
+
+or copy the script into the appropriate directory of your NMAP installation.
+
+    In KALI LINUX™ for example: /usr/share/nmap/scripts/
+
+    sudo nmap --script-ubdatedb
+
+Important note: Many queries can cause problems with the API when scanning directly into categories such as safe etc. It is recommended to run freevulnsearch.nse separately without additional NSE scripts. Therefore I removed the assignment scripts from the categories safe and vuln at the moment and only specified the category external. If you do not want to make an assignment to the category external, then do not execute the nmap --script-updatedb command mentioned above.
+
+## Usage:
 
 The usage is simple, just use NMAP -sV and this script.
-* nmap -sV --script freevulnsearch *target*
 
-**CPE exception handling for format:**
+    nmap -sV --script ~/freevulnsearch <target>
+    
+It is recommended to run freevulnsearch.nse separately without additional NSE scripts. 
+
+## CPE exception handling for format:
 
 If a NMAP CPE is not clear, several functions in the freevulnsearch.nse script check whether the formatting of the CPE is inaccurate. For example:
 
