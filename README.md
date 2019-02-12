@@ -43,6 +43,10 @@ Important note: First read the confidentiality information. It is recommended to
 The usage is simple, just use NMAP -sV and this script.
 
     nmap -sV --script freevulnsearch <target>
+    
+According to my tests, for stability reasons, only http without TLS should be used when querying the API for many simultaneous requests. For this reason, you can optionally disable TLS using an input argument.
+
+    nmap -sV --script freevulnsearch --script-args notls=yes <target>
 
 ## CPE exception handling for format:
 
