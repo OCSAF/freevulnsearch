@@ -12,13 +12,7 @@ The CVEs are queried by default using the CPEs determined by NMAP via the ingeni
 
 ## Confidentiality information:
 
-The queries are made using the determined CPE via the circl.lu API. According to my tests, for stability reasons, only http without TLS should be used when querying the API for many simultaneous requests.
-
-For this reason, you can optionally disable TLS using an input argument.
-
-    nmap -sV --script freevulnsearch --script-args notls=yes <target>
-
-If you scan with the categories safe or vuln then exclude the script or the category external or do not add the script to the NMAP default directory.
+The queries are made using the determined CPE via the circl.lu API. For further information on the confidentiality of the circl.lu API, please visit https://www.circl.lu/services/cve-search/ directly.
 
 The best way is to install cve-search (https://github.com/cve-search/cve-search) locally and use your own API with
 
@@ -44,9 +38,11 @@ The usage is simple, just use NMAP -sV and this script.
 
     nmap -sV --script freevulnsearch <target>
     
-According to my tests, for stability reasons, only http without TLS should be used when querying the API for many simultaneous requests. For this reason, you can optionally disable TLS using an input argument.
+According to my tests, for stability reasons, only http without TLS should be used when querying the API for many simultaneous requests. For this reason, you can optionally disable TLS using an input argument. Important, after that the API query to circl.lu is unencrypted.
 
     nmap -sV --script freevulnsearch --script-args notls=yes <target>
+    
+If you scan with the categories safe or vuln then exclude the script or the category external or do not add the script to the NMAP default directory. It is recommended to run freevulnsearch.nse separately without additional NSE scripts.
 
 ## CPE exception handling for format:
 
