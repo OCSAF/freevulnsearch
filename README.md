@@ -8,7 +8,21 @@ This NMAP NSE script is part of the Free OCSAF project - https://freecybersecuri
 * Low (CVSS 0.1 - 3.9)
 * None (CVSS 0.0)
 
-The CVEs are queried by default using the CPEs determined by NMAP via the ingenious and public API of the cve-search.org project, which is provided by circl.lu. For more information visit https://www.cve-search.org/api/ .
+The CVEs are queried by default using the CPEs determined by NMAP via the ingenious and public API of the cve-search.org project, which is provided by circl.lu. For more information visit https://www.cve-search.org/api/.
+
+## Confidentiality information:
+
+The queries are made using the determined CPE via HTTP. For stability reasons, the connection is not secured by TLS encryption (https). For further information on the confidentiality of the circl.lu API, please visit https://www.circl.lu/services/cve-search/ directly.
+
+You can optionally activate the query via TLS using the input argument tls.
+
+    nmap -sV --script freevulnsearch --script-args tls=yes <target>
+
+If you scan with the categories safe or vuln then exclude the script or the category external or do not add the script to the NMAP default directory.
+
+The best way is to install cve-search (https://github.com/cve-search/cve-search) locally and use your own API with
+
+    nmap -sV --script freevulnsearch --script-args apipath=<URL> <target>
 
 ## Installation:
 
@@ -22,15 +36,13 @@ or copy the script into the appropriate directory of your NMAP installation.
 
     sudo nmap --script-ubdatedb
 
-Important note: Many queries can cause problems with the API when scanning directly into categories such as safe etc. It is recommended to run freevulnsearch.nse separately without additional NSE scripts. Therefore I removed the assignment scripts from the categories safe and vuln at the moment and only specified the category external. If you do not want to make an assignment to the category external, then do not execute the nmap --script-updatedb command mentioned above.
+Important note: First read the confidentiality information. It is recommended to run freevulnsearch.nse separately without additional NSE scripts. If you do not want to make an assignment to the category safe, vuln and external, then do not execute the nmap --script-updatedb command mentioned above.
 
 ## Usage:
 
 The usage is simple, just use NMAP -sV and this script.
 
     nmap -sV --script freevulnsearch <target>
-    
-It is recommended to run freevulnsearch.nse separately without additional NSE scripts. 
 
 ## CPE exception handling for format:
 
