@@ -28,7 +28,7 @@ Important note: Many queries can cause problems with the API when scanning direc
 
 The usage is simple, just use NMAP -sV and this script.
 
-    nmap -sV --script ~/freevulnsearch <target>
+    nmap -sV --script freevulnsearch <target>
     
 It is recommended to run freevulnsearch.nse separately without additional NSE scripts. 
 
