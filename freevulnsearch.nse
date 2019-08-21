@@ -16,7 +16,7 @@ local xmlhtml = stdnse.get_script_args("freevulnsearch.xmlhtml")
 
 description = [[
 
-This script [Version 1.1.6a] allows you to automatically search for CVEs using the API of 
+This script [Version 1.1.7] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -39,6 +39,7 @@ Version 1.1.4 - Optimization for OCSAF freevulnaudit.sh project.
 Version 1.1.5 - Assignment to external category only
 Version 1.1.6 - Adaptation API to http and tls as option
 Version 1.1.6a - Adaptation API to tls and http as option
+Version 1.1.7 - Optimized for nmap 7.80
 
 Future functions:
 Version 1.2 - Shall contains optional sort by severity (CVSS)
@@ -196,6 +197,9 @@ end
 function func_check_cve(cpe)
 
 	local url
+	local option = {
+	max_body_size=40000000
+	}
 	local response
 	local request
 	local status
@@ -213,7 +217,7 @@ function func_check_cve(cpe)
 
 	request = url .. cpe
 
-	response = http.get_url(request)
+	response = http.get_url(request, option)
 	
 	status, vulnerabilities = json.parse(response.body)
 
