@@ -198,7 +198,8 @@ function func_check_cve(cpe)
 
 	local url
 	local option = {
-	max_body_size=40000000
+	max_body_size=40000000,
+	timeout=40000
 	}
 	local response
 	local request
