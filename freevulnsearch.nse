@@ -16,7 +16,7 @@ local xmlhtml = stdnse.get_script_args("freevulnsearch.xmlhtml")
 
 description = [[
 
-This script [Version 1.1.7] allows you to automatically search for CVEs using the API of 
+This script [Version 1.1.8] allows you to automatically search for CVEs using the API of 
 https://www.circl.lu/services/cve-search/ in connection with the found CPEs
 using the parameter -sV in NMAP.
 
@@ -40,6 +40,7 @@ Version 1.1.5 - Assignment to external category only
 Version 1.1.6 - Adaptation API to http and tls as option
 Version 1.1.6a - Adaptation API to tls and http as option
 Version 1.1.7 - Optimized for nmap 7.80
+Version 1.1.8 - Optimized for cve-search api
 
 Future functions:
 Version 1.2 - Shall contains optional sort by severity (CVSS)
@@ -263,8 +264,10 @@ function func_output(vulnerabilities)
  		cve_value = t.id
 		cvss = tonumber(t.cvss)
  		url_value = cve_url .. t.id
-		edb = t["exploit-db"]
-		msf = t.metasploit
+		if t.refmap then
+			edb = t.refmap["exploit-db"]
+			msf = t.refmap.metasploit
+		end
 
 		if not cvss then
 			cvss_value = "None"
